@@ -32,7 +32,7 @@ import {prefixCls} from '../prefix'
 
 export default {
   name: `${prefixCls}Swiper`,
-  data () {
+  data() {
     return {
       prefixCls: prefixCls,
       containerWidth: '', // 组件宽
@@ -56,7 +56,7 @@ export default {
     },
     autoPlay: {
       type: Boolean,
-      default: true
+      default: false
     },
     slideBefore: Function,
     slideAfter: Function,
@@ -93,20 +93,22 @@ export default {
       validator: function (value) {
         return ['fade', 'slide'].indexOf(value) !== -1
       }
-    }
+    },
+    itemWidth: String,
+    move: Number
   },
   watch: {
-    active (v) {
+    active(v) {
       this.current = v
       this._translate(v)
     }
   },
   components: {},
   methods: {
-    _getTouch (event) {
+    _getTouch(event) {
       return event.changedTouches[0] || event.touches[0]
     },
-    _touchStart (event) {
+    _touchStart(event) {
       if (!this.touch || this.animation === 'fade') {
         return
       }
@@ -116,7 +118,7 @@ export default {
       // 重置item项初始状态
       event.preventDefault()
     },
-    _touchMove (event) {
+    _touchMove(event) {
       if (!this.touch || this.animation === 'fade') {
         return
       }
@@ -127,7 +129,7 @@ export default {
       this.translate = -this.containerWidth * this.current + distance
       event.preventDefault()
     },
-    _touchEnd (event) {
+    _touchEnd(event) {
       if (!this.touch || this.animation === 'fade') {
         return
       }
@@ -158,7 +160,7 @@ export default {
       this._slideAfter(index)
       this._autoPlay()
     },
-    _setCurrent (current) {
+    _setCurrent(current) {
       setTimeout(() => {
         this.current = current
         // 将滑动恢复为0,0,0位置
@@ -166,7 +168,7 @@ export default {
         this._translate(current, 0)
       }, this.duration)
     },
-    _translate (current, duration) {
+    _translate(current, duration) {
       this.duration2 = duration === 0 ? 0 : this.duration
       this.translate = -this.containerWidth * current
       if (this.animation === 'fade') {
@@ -174,7 +176,7 @@ export default {
       }
       // this.swipes[current].active = true
     },
-    _swipesActive (current) {
+    _swipesActive(current) {
       let len = this.swipes.length
       if (current > len - 1) {
         this.current = 0
@@ -188,7 +190,7 @@ export default {
       console.log(this.current)
       // 设置当前滑动的样式为active
     },
-    _directionNavClick (direction) {
+    _directionNavClick(direction) {
       // direction -1 上一个，1下一个
       // 开始滑动前回调
       this._slideBefore(this.current)
@@ -217,13 +219,13 @@ export default {
       }
       this._slideAfter(this.current)
     },
-    _controlNavClick (index) {
+    _controlNavClick(index) {
       this._slideBefore(index)
       this.current = index
       this._translate(index)
       this._slideAfter(index)
     },
-    _setItem (direction) {
+    _setItem(direction) {
       // direction方向，大于0下一个，小于0上一个
       // 触摸和前后点击共同项
       const len = this.swipes.length
@@ -244,7 +246,7 @@ export default {
       }
       return [moveFirstOrLast, index]
     },
-    _autoPlay () {
+    _autoPlay() {
       if (this.autoPlay) {
         this.timer = setInterval(() => {
           // 每隔一定的时单，点下一个
@@ -252,30 +254,38 @@ export default {
         }, this.showTime)
       }
     },
-    _slideBefore (index) {
+    _slideBefore(index) {
       this.slideBefore && this.slideBefore(index)
       this.$emit('slideBefore', index)
     },
-    _slideAfter (index) {
+    _slideAfter(index) {
       setTimeout(() => {
         this.slideAfter && this.slideAfter(index)
         this.$emit('slideAfter', index)
       }, this.duration)
     },
-    _mouseOver () {
+    _mouseOver() {
       // 如果鼠标滑动过时暂停和自动播放时，鼠标移上暂停
       if (this.pauseOnHover && this.autoPlay) {
         clearInterval(this.timer)
       }
     },
-    _mouseLeave () {
+    _mouseLeave() {
       this._autoPlay()
     }
   },
   computed: {
-    styleWrap () {
+    styleWrap() {
+      let width = this.containerWidth
+      if (this.itemWidth) {
+        width = this.itemWidth.replace(/%|px/, '')
+        if (this.itemWidth.indexOf('%') !== -1) {
+          // 使用百分比单位，转px
+          width = this.containerWidth * this.itemWidth / 100
+        }
+      }
       let animation = {
-        width: this.containerWidth * this.swipes.length + 'px',
+        width: width * this.swipes.length + 'px',
         transform: `translate3d(${this.translate}px,0,0)`,
         transition: `transform ${this.duration2}ms`
       }
@@ -287,9 +297,13 @@ export default {
         }
       }
       return animation
+    },
+    swipesLen() {
+      let swipes = this.swipes
+      return swipes
     }
   },
-  mounted () {
+  mounted() {
     this.containerWidth = this.$refs.container.offsetWidth// 宽
     this.containerHeight = this.$refs.container.offsetHeight
     this._translate(this.current)

@@ -6,9 +6,10 @@
 </template>
 <script>
 import {prefixCls} from '../prefix'
+
 export default {
   name: `${prefixCls}SwipeItem`,
-  data () {
+  data() {
     return {
       offset: 0, // 由父组件swiper更新
       active: false // 当前添加样式，同样由父组件更新
@@ -18,9 +19,9 @@ export default {
   components: {},
   methods: {},
   computed: {
-    style () {
+    style() {
       let animation = {
-        width: this.$parent.containerWidth + 'px',
+        width: this.$parent.itemWidth || this.$parent.containerWidth + 'px',
         float: 'left',
         transform: `translate3d(${this.offset}px, 0, 0)`,
         transition: `transform 0ms`
@@ -40,7 +41,7 @@ export default {
       return animation
     }
   },
-  mounted () {
+  mounted() {
     this.$parent.swipes.push(this)// 更新item个数
     // console.log(this.$refs.slide)
   },
