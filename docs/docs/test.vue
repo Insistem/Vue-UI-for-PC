@@ -1,30 +1,26 @@
 <template>
   <div>
-    <ak-form ref="backForm">
-      <ak-form-item prop="password1" label="密码" verify="required,digits">
-        <ak-input v-model="form.name"></ak-input>
-      </ak-form-item>
-
-      <ak-form-item prop="password2" label="确认密码" verify="digits">
-        <ak-input v-model="form.password"></ak-input>
-      </ak-form-item>
-    </ak-form>
+    <ak-swiper itemWidth="250px">
+      <ak-swipe-item v-for="item in 5">{{item}}</ak-swipe-item>
+    </ak-swiper>
+   <!-- <Tt12 :imgList="imgList"></Tt12>-->
   </div>
 </template>
 <script>
+import Tt12 from './tt'
 
 export default {
   data() {
     return {
+      imgList: [0, 2, 3, 4, 5, 6, 7],
       form: {
         name: '',
         password: ''
       }
     }
   },
-  components: {},
-  methods: {
-  },
+  components: {Tt12},
+  methods: {},
   mounted() {
 
   }

@@ -12,8 +12,11 @@
        @touchcancel="_touchEnd"
        @mouseover="_mouseOver"
        @mouseleave="_mouseLeave">
+    <slot></slot>
     <div class="swiper-wrapper" :style="styleWrap">
-      <slot/>
+      <div class="swiper-slide" v-for="(item,index) in swipes" :key="index" v-html="item.$slots.default">
+      </div>
+      <!--<div v-html="swipes[0].$slots.default"></div>-->
     </div>
     <div class="direction-nav" v-if="directionNav">
       <a href="javascript:;" class="swiper-prev" @click="_directionNavClick(-1)"></a>
@@ -21,7 +24,7 @@
     </div>
     <div class="control-nav" v-if="controlNav">
       <a href="javascript:;"
-         v-for="(item,index) in swipes"
+         v-for="(item,index) in swipesLen"
          :class="{'control-nav-active':index===current}"
          :key="index" @click="_controlNavClick(index)"></a>
     </div>
@@ -84,10 +87,10 @@ export default {
       type: Boolean,
       default: false
     },
-    /* loop: { // 循环
+    loop: { // 循环
       type: Boolean,
       default: false
-    }, */
+    },
     animation: { // 动画
       default: 'slide',
       validator: function (value) {
@@ -95,7 +98,10 @@ export default {
       }
     },
     itemWidth: String,
-    move: Number
+    move: {
+      type: Number,
+      default: 1
+    }
   },
   watch: {
     active(v) {
@@ -275,7 +281,8 @@ export default {
     }
   },
   computed: {
-    styleWrap() {
+    unitWidth() {
+      // 一个单位的宽，默认为container，设置了itemWidth时为设置的宽
       let width = this.containerWidth
       if (this.itemWidth) {
         width = this.itemWidth.replace(/%|px/, '')
@@ -284,8 +291,11 @@ export default {
           width = this.containerWidth * this.itemWidth / 100
         }
       }
+      return parseInt(width)
+    },
+    styleWrap() {
       let animation = {
-        width: width * this.swipes.length + 'px',
+        width: this.unitWidth * this.swipes.length + 'px',
         transform: `translate3d(${this.translate}px,0,0)`,
         transition: `transform ${this.duration2}ms`
       }
@@ -299,8 +309,11 @@ export default {
       return animation
     },
     swipesLen() {
-      let swipes = this.swipes
-      return swipes
+      // 返回可显示的多少屏，即小圆点的个数
+      // 计算每屏显示的数量＝一屏的宽/一个单位的宽
+      const num = parseInt(this.containerWidth / this.unitWidth)
+      const len = Math.ceil(this.swipes.length / num)
+      return len || 0
     }
   },
   mounted() {
@@ -308,6 +321,10 @@ export default {
     this.containerHeight = this.$refs.container.offsetHeight
     this._translate(this.current)
     this._autoPlay()
+    console.log('==============')
+    this.swipes.forEach(item => {
+      console.log(item)
+    })
   },
   filters: {}
 }

@@ -1,9 +1,9 @@
 <!--Created by 337547038.-->
-<template>
+<!--<template>
   <div class="swiper-slide" :style="style" :class="{'active':active}">
     <slot/>
   </div>
-</template>
+</template>-->
 <script>
 import {prefixCls} from '../prefix'
 
@@ -43,7 +43,9 @@ export default {
   },
   mounted() {
     this.$parent.swipes.push(this)// 更新item个数
-    // console.log(this.$refs.slide)
+  },
+  render() {
+    return this.$slots.default
   },
   filters: {}
 }
